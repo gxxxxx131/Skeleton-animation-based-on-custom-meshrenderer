@@ -1,0 +1,62 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+
+//float3 position
+//float3 normal
+//float4 tangent
+//10 float and 4 bytes each
+RWByteAddressBuffer bufVertices;
+//float4 weight 
+//int4 index
+
+struct boneWeight{
+    float weight[4];
+    int index[4];
+};
+RWStructuredBuffer<float3> bufPosition;
+RWStructuredBuffer<float3> bufNormal;
+RWStructuredBuffer<float4> bufTangent;
+RWStructuredBuffer<boneWeight> bufWeights;
+RWStructuredBuffer<float4x4> bufBoneMatrices;
+RWStructuredBuffer<float4x4> bufBoneNormalMatrices;
+
+float4x4 world2local;
+
+
+[numthreads(64,1,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    // TODO: insert actual code here!
+    float3 position=bufPosition[id.x];
+    float3 normal=bufNormal[id.x];
+    float4 tangent=bufTangent[id.x];
+
+    float weights[4]=bufWeights[id.x].weight;
+    int indices[4]=bufWeights[id.x].index;
+    
+
+    float4 totalPosition=0;
+    float4 totalNormal=0;
+    float4 totaltangent=0;
+    for(int i=0;i<4;++i){
+        if(indices[i]==-1)
+            continue;
+        float4 deformedpos=mul(bufBoneMatrices[indices[i]],float4(position,1.0));
+        totalPosition+=deformedpos*weights[i];
+
+        float4 deformednormal=mul(bufBoneNormalMatrices[indices[i]],float4(normal,0));
+        totalNormal+=deformednormal*weights[i];
+
+        float4 deformedtangent=mul(bufBoneMatrices[indices[i]],float4(tangent.xyz,1.0));
+        totaltangent+=deformedtangent*weights[i];
+
+    }
+    float3 finalNormal=normalize(totalNormal.xyz);
+    totaltangent.xyz=normalize(totaltangent.xyz);
+    totaltangent.w=tangent.w;
+    totalPosition=mul(world2local,float4(totalPosition.xyz,1.0));
+    bufVertices.Store3(id.x*40,asuint(totalPosition.xyz));
+    bufVertices.Store3(id.x*40+12,asuint(finalNormal));
+    bufVertices.Store4(id.x*40+24,asuint(totaltangent));
+}
