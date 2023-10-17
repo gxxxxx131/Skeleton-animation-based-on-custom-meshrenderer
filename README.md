@@ -1,5 +1,5 @@
 # Skeleton-animation-based-on-custom-meshrenderer
-Make meshrenderer behave as skinnedmeshrenderer by using computeshader.
+Make meshrenderer behave as skinnedmeshrenderer with the help of computeshader.
 
 --------
 
