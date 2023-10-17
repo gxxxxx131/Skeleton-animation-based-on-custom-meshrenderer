@@ -14,12 +14,12 @@ struct boneWeight{
     float weight[4];
     int index[4];
 };
-RWStructuredBuffer<float3> bufPosition;
-RWStructuredBuffer<float3> bufNormal;
-RWStructuredBuffer<float4> bufTangent;
-RWStructuredBuffer<boneWeight> bufWeights;
-RWStructuredBuffer<float4x4> bufBoneMatrices;
-RWStructuredBuffer<float4x4> bufBoneNormalMatrices;
+StructuredBuffer<float3> bufPosition;
+StructuredBuffer<float3> bufNormal;
+StructuredBuffer<float4> bufTangent;
+StructuredBuffer<boneWeight> bufWeights;
+StructuredBuffer<float4x4> bufBoneMatrices;
+StructuredBuffer<float4x4> bufBoneNormalMatrices;
 
 float4x4 world2local;
 
